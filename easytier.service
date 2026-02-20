@@ -1,0 +1,11 @@
+[Unit]
+Description=EasyTier Service
+After=network.target syslog.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/easytier-core --ipv4 10.254.254.251 -p udp://103.40.13.112:20000
+
+[Install]
+WantedBy=multi-user.target
