@@ -1,0 +1,868 @@
+# clash
+port: 7890
+socks-port: 7891
+mixed-port: 7892
+allow-lan: false
+bind-address: '*'
+mode: rule
+log-level: info
+ipv6: false
+find-process-mode: strict
+external-controller: '127.0.0.1:9090'
+profile:
+  store-selected: true
+  store-fake-ip: true
+unified-delay: true
+tcp-concurrent: true
+ntp:
+  enable: true
+  write-to-system: false
+  server: ntp.aliyun.com
+  port: 123
+  interval: 30
+dns:
+  enable: false
+  listen: ':53'
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  prefer-h3: false
+  respect-rules: true
+  use-hosts: false
+  use-system-hosts: false
+  ipv6: true
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '*.arpa'
+    - 'time.*.com'
+    - 'ntp.*.com'
+    - +.market.xiaomi.com
+    - localhost.ptlogin2.qq.com
+    - '*.msftncsi.com'
+    - www.msftconnecttest.com
+  default-nameserver:
+    - system
+    - 223.6.6.6
+    - 8.8.8.8
+    - '2400:3200::1'
+    - '2001:4860:4860::8888'
+  nameserver:
+    - 'https://cloudflare-dns.com/dns-query'
+    - 'https://doh.pub/dns-query'
+    - 'https://dns.alidns.com/dns-query'
+    - 8.8.8.8
+  direct-nameserver:
+    - 'https://doh.pub/dns-query'
+    - 'https://dns.alidns.com/dns-query'
+    - 223.5.5.5
+    - 119.29.29.29
+  direct-nameserver-follow-policy: true
+  fallback:
+    - 'https://1.1.1.1/dns-query'
+    - 'https://8.8.8.8/dns-query'
+    - 'https://dns.google/dns-query'
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+    domain:
+      - +.google.com
+      - +.facebook.com
+      - +.youtube.com
+      - +.twitter.com
+      - +.github.com
+  proxy-server-nameserver:
+    - 'https://doh.pub/dns-query'
+    - 'https://dns.alidns.com/dns-query'
+    - 'tls://223.5.5.5'
+tun:
+  enable: true
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
+  dns-hijack:
+    - 'any:53'
+  device: SakuraiTunnel
+  mtu: 1500
+  endpoint-independent-nat: true
+proxies:
+  - name: dl-direct
+    type: vless
+    server: dl.noah-edu.com
+    port: 443
+    uuid: 5ca0bcbc-5896-48a2-9a43-ebe72db80dff
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: true
+    servername: dl.noah-edu.com
+    ws-opts:
+      path: /wsc-dda46b634fd5
+      headers:
+        Host: dl.noah-edu.com
+
+  - name: dl-cf
+    type: vless
+    server: cf1.noah-edu.com
+    port: 443
+    uuid: 5ca0bcbc-5896-48a2-9a43-ebe72db80dff
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: false
+    servername: cf1.noah-edu.com
+    ws-opts:
+      path: /wsc-dda46b634fd5
+      headers:
+        Host: cf1.noah-edu.com
+
+  - name: dl2-direct
+    type: vless
+    server: dl2.noah-edu.com
+    port: 443
+    uuid: cddffbf2-f5ef-4067-bddd-23b75e4ff1a1
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: true
+    servername: dl2.noah-edu.com
+    ws-opts:
+      path: /wsc-12347f94a72e
+      headers:
+        Host: dl2.noah-edu.com
+
+  - name: dl2-cf
+    type: vless
+    server: cf2.noah-edu.com
+    port: 443
+    uuid: cddffbf2-f5ef-4067-bddd-23b75e4ff1a1
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: false
+    servername: cf2.noah-edu.com
+    ws-opts:
+      path: /wsc-12347f94a72e
+      headers:
+        Host: cf2.noah-edu.com
+
+  - name: cfw1
+    type: vless
+    server: cfw1.noah-edu.com
+    port: 443
+    uuid: 5ca0bcbc-5896-48a2-9a43-ebe72db80dff
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: false
+    servername: cfw1.noah-edu.com
+    ws-opts:
+      path: "/"
+      headers:
+        Host: cfw1.noah-edu.com
+
+  - name: cfw2
+    type: vless
+    server: cfw2.noah-edu.com
+    port: 443
+    uuid: cddffbf2-f5ef-4067-bddd-23b75e4ff1a1
+    network: ws
+    tls: true
+    udp: false
+    skip-cert-verify: false
+    servername: cfw2.noah-edu.com
+    ws-opts:
+      path: "/"
+      headers:
+        Host: cfw2.noah-edu.com
+proxy-groups:
+  - name: PROXY
+    type: select
+    proxies:
+      - DIRECT
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: 自动选择
+    type: url-test
+    proxies:
+      - DIRECT
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 180
+    tolerance: 25
+  -
+    name: 负载均衡
+    type: load-balance
+    proxies:
+      - DIRECT
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    tolerance: 50
+    strategy: consistent-hashing
+  -
+    name: Bahamut
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Bilibili
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Discord
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: GoogleFCM
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Netflix
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: OpenAI
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Speedtest
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Spotify
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Steam
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Telegram
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: TikTok
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Apple
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Google
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: Microsoft
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: GFW傻逼
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+  -
+    name: 中国大陆网站
+    type: select
+    proxies:
+      - DIRECT
+      - PROXY
+      - 自动选择
+      - 负载均衡
+      - dl-direct
+      - dl-cf
+      - dl2-direct
+      - dl2-cf
+      - cfw1
+      - cfw2
+rule-providers:
+  Bahamut-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Bahamut/Bahamut-Site.mrs'
+    path: ./ruleset/Bahamut-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Apple-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Apple/Apple-Site.mrs'
+    path: ./ruleset/Apple-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Apple-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Apple/Apple-IP.mrs'
+    path: ./ruleset/Apple-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  Bilibili-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Bilibili/Bilibili-Site.mrs'
+    path: ./ruleset/Bilibili-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Bilibili-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Bilibili/Bilibili-IP.mrs'
+    path: ./ruleset/Bilibili-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  China-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/China/China-Site.mrs'
+    path: ./ruleset/China-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  China-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/China/China-IP.mrs'
+    path: ./ruleset/China-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  Discord-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Discord/Discord-Site.mrs'
+    path: ./ruleset/Discord-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  GFWList-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/GFWList/GFWList-Site.mrs'
+    path: ./ruleset/GFWList-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Google-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Google/Google-Site.mrs'
+    path: ./ruleset/Google-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Google-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Google/Google-IP.mrs'
+    path: ./ruleset/Google-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  GoogleFCM-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/GoogleFCM/GoogleFCM-Site.mrs'
+    path: ./ruleset/GoogleFCM-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Local-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Local/Local-IP.mrs'
+    path: ./ruleset/Local-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  Microsoft-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Microsoft/Microsoft-Site.mrs'
+    path: ./ruleset/Microsoft-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Netflix-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Netflix/Netflix-Site.mrs'
+    path: ./ruleset/Netflix-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Netflix-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Netflix/Netflix-IP.mrs'
+    path: ./ruleset/Netflix-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  OpenAI-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/OpenAI/OpenAI-Site.mrs'
+    path: ./ruleset/OpenAI-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  OpenAI-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/OpenAI/OpenAI-IP.mrs'
+    path: ./ruleset/OpenAI-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  Speedtest-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Speedtest/Speedtest-Site.mrs'
+    path: ./ruleset/Speedtest-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Spotify-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Spotify/Spotify-Site.mrs'
+    path: ./ruleset/Spotify-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Spotify-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Spotify/Spotify-IP.mrs'
+    path: ./ruleset/Spotify-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  Steam-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Steam/Steam-Site.mrs'
+    path: ./ruleset/Steam-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Telegram-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Telegram/Telegram-Site.mrs'
+    path: ./ruleset/Telegram-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+  Telegram-IP:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/Telegram/Telegram-IP.mrs'
+    path: ./ruleset/Telegram-IP.mrs
+    proxy: DIRECT
+    interval: 86400
+  TikTok-Site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: 'https://cdn.jsdmirror.com/gh/HosheaPDNX/rule-set@V2.0.0/mihomo/TikTok/TikTok-Site.mrs'
+    path: ./ruleset/TikTok-Site.mrs
+    proxy: DIRECT
+    interval: 86400
+rules:
+#  - 'AND,((DST-PORT,443),(NETWORK,UDP)),REJECT'
+  - 'DOMAIN-SUFFIX,chroniflow.com,DIRECT'
+  - 'DOMAIN-SUFFIX,sliveridc1.cn,DIRECT'
+  - 'DOMAIN-SUFFIX,silveridc.cn,DIRECT'
+  - 'DOMAIN-SUFFIX,midsancode.com,DIRECT'
+  - 'DOMAIN-KEYWORD,cloudflare,DIRECT'
+  - 'DOMAIN,ntp.aliyun.com,DIRECT'
+  - 'DOMAIN,proxy.sakuraikaede.com,DIRECT'
+  - 'DOMAIN,converter-mitce.sakuraikaede.com,DIRECT'
+  - 'DOMAIN-KEYWORD,msftconnecttest.com,PROXY'
+  - 'DOMAIN-KEYWORD,msftncsi.com,PROXY'
+  - 'DOMAIN-KEYWORD,googleapis,Google'
+  - 'RULE-SET,Bahamut-Site,Bahamut'
+  - 'RULE-SET,Bilibili-Site,Bilibili'
+  - 'RULE-SET,Discord-Site,Discord'
+  - 'RULE-SET,GoogleFCM-Site,GoogleFCM'
+  - 'RULE-SET,Netflix-Site,Netflix'
+  - 'RULE-SET,OpenAI-Site,OpenAI'
+  - 'RULE-SET,Speedtest-Site,Speedtest'
+  - 'RULE-SET,Spotify-Site,Spotify'
+  - 'RULE-SET,Steam-Site,Steam'
+  - 'RULE-SET,Telegram-Site,Telegram'
+  - 'RULE-SET,TikTok-Site,TikTok'
+  - 'RULE-SET,Apple-Site,Apple'
+  - 'RULE-SET,Google-Site,Google'
+  - 'RULE-SET,Microsoft-Site,Microsoft'
+  - 'RULE-SET,GFWList-Site,GFW傻逼'
+  - 'RULE-SET,China-Site,中国大陆网站'
+  - 'RULE-SET,Local-IP,DIRECT,no-resolve'
+  - 'RULE-SET,Bilibili-IP,Bilibili'
+  - 'RULE-SET,Netflix-IP,Netflix'
+  - 'RULE-SET,OpenAI-IP,OpenAI'
+  - 'RULE-SET,Spotify-IP,Spotify'
+  - 'RULE-SET,Telegram-IP,Telegram'
+  - 'RULE-SET,Apple-IP,Apple'
+  - 'RULE-SET,Google-IP,Google'
+  - 'RULE-SET,China-IP,中国大陆网站'
+  - 'DOMAIN-KEYWORD,admarvel,REJECT'
+  - 'DOMAIN-KEYWORD,admaster,REJECT'
+  - 'DOMAIN-KEYWORD,adsage,REJECT'
+  - 'DOMAIN-KEYWORD,adsmogo,REJECT'
+  - 'DOMAIN-KEYWORD,adsrvmedia,REJECT'
+  - 'DOMAIN-KEYWORD,adwords,REJECT'
+  - 'DOMAIN-KEYWORD,adservice,REJECT'
+  - 'DOMAIN-KEYWORD,domob,REJECT'
+  - 'DOMAIN-KEYWORD,duomeng,REJECT'
+  - 'DOMAIN-KEYWORD,dwtrack,REJECT'
+  - 'DOMAIN-KEYWORD,guanggao,REJECT'
+  - 'DOMAIN-KEYWORD,lianmeng,REJECT'
+  - 'DOMAIN-KEYWORD,omgmta,REJECT'
+  - 'DOMAIN-KEYWORD,openx,REJECT'
+  - 'DOMAIN-KEYWORD,partnerad,REJECT'
+  - 'DOMAIN-KEYWORD,supersonicads,REJECT'
+  - 'DOMAIN-KEYWORD,umeng,REJECT'
+  - 'DOMAIN-KEYWORD,zjtoolbar,REJECT'
+  - 'DOMAIN-SUFFIX,appsflyer.com,REJECT'
+  - 'DOMAIN-SUFFIX,doubleclick.net,REJECT'
+  - 'DOMAIN-SUFFIX,mmstat.com,REJECT'
+  - 'DOMAIN-SUFFIX,local,DIRECT'
+  - 'DOMAIN-SUFFIX,localhost,DIRECT'
+  - 'IP-CIDR,10.0.0.0/8,DIRECT,no-resolve'
+  - 'IP-CIDR,17.0.0.0/8,DIRECT,no-resolve'
+  - 'IP-CIDR,100.64.0.0/10,DIRECT,no-resolve'
+  - 'IP-CIDR,127.0.0.0/8,DIRECT,no-resolve'
+  - 'IP-CIDR,172.16.0.0/12,DIRECT,no-resolve'
+  - 'IP-CIDR,192.168.0.0/16,DIRECT,no-resolve'
+  - 'IP-CIDR,198.18.0.0/16,DIRECT,no-resolve'
+  - 'IP-CIDR,224.0.0.0/4,DIRECT,no-resolve'
+  - 'IP-CIDR6,::1/128,DIRECT,no-resolve'
+  - 'IP-CIDR6,fc00::/7,DIRECT,no-resolve'
+  - 'IP-CIDR6,fe80::/10,DIRECT,no-resolve'
+  - 'DOMAIN,safebrowsing.urlsec.qq.com,DIRECT'
+  - 'DOMAIN-SUFFIX,apple.com,DIRECT'
+  - 'DOMAIN-SUFFIX,apple-cloudkit.com,DIRECT'
+  - 'DOMAIN-SUFFIX,icloud.com,DIRECT'
+  - 'DOMAIN-SUFFIX,icloud-content.com,DIRECT'
+  - 'DOMAIN-SUFFIX,mzstatic.com,DIRECT'
+  - 'DOMAIN-SUFFIX,aaplimg.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cdn-apple.com,DIRECT'
+  - 'DOMAIN-SUFFIX,akadns.net,DIRECT'
+  - 'DOMAIN-KEYWORD,baidu,DIRECT'
+  - 'DOMAIN-KEYWORD,alibaba,DIRECT'
+  - 'DOMAIN-KEYWORD,alicdn,DIRECT'
+  - 'DOMAIN-KEYWORD,alipay,DIRECT'
+  - 'DOMAIN-KEYWORD,taobao,DIRECT'
+  - 'DOMAIN-KEYWORD,tencent,DIRECT'
+  - 'DOMAIN-KEYWORD,bilibili,DIRECT'
+  - 'DOMAIN-KEYWORD,weibo,DIRECT'
+  - 'DOMAIN-KEYWORD,douyin,DIRECT'
+  - 'DOMAIN-KEYWORD,bytedance,DIRECT'
+  - 'DOMAIN-KEYWORD,xiaomi,DIRECT'
+  - 'DOMAIN-KEYWORD,huawei,DIRECT'
+  - 'DOMAIN-KEYWORD,netease,DIRECT'
+  - 'DOMAIN-KEYWORD,meituan,DIRECT'
+  - 'DOMAIN-KEYWORD,pinduoduo,DIRECT'
+  - 'DOMAIN-KEYWORD,kuaishou,DIRECT'
+  - 'DOMAIN-KEYWORD,jingdong,DIRECT'
+  - 'DOMAIN-KEYWORD,officecdn,DIRECT'
+  - 'DOMAIN-SUFFIX,qq.com,DIRECT'
+  - 'DOMAIN-SUFFIX,weixin.com,DIRECT'
+  - 'DOMAIN-SUFFIX,wechat.com,DIRECT'
+  - 'DOMAIN-SUFFIX,gtimg.com,DIRECT'
+  - 'DOMAIN-SUFFIX,qcloud.com,DIRECT'
+  - 'DOMAIN-SUFFIX,myqcloud.com,DIRECT'
+  - 'DOMAIN-SUFFIX,qpic.cn,DIRECT'
+  - 'DOMAIN-SUFFIX,tenpay.com,DIRECT'
+  - 'DOMAIN-SUFFIX,tmall.com,DIRECT'
+  - 'DOMAIN-SUFFIX,jd.com,DIRECT'
+  - 'DOMAIN-SUFFIX,360buyimg.com,DIRECT'
+  - 'DOMAIN-SUFFIX,iqiyi.com,DIRECT'
+  - 'DOMAIN-SUFFIX,youku.com,DIRECT'
+  - 'DOMAIN-SUFFIX,ykimg.com,DIRECT'
+  - 'DOMAIN-SUFFIX,tudou.com,DIRECT'
+  - 'DOMAIN-SUFFIX,acfun.tv,DIRECT'
+  - 'DOMAIN-SUFFIX,hdslb.com,DIRECT'
+  - 'DOMAIN-SUFFIX,sohu.com,DIRECT'
+  - 'DOMAIN-SUFFIX,sogou.com,DIRECT'
+  - 'DOMAIN-SUFFIX,zhihu.com,DIRECT'
+  - 'DOMAIN-SUFFIX,zhimg.com,DIRECT'
+  - 'DOMAIN-SUFFIX,douban.com,DIRECT'
+  - 'DOMAIN-SUFFIX,doubanio.com,DIRECT'
+  - 'DOMAIN-SUFFIX,163.com,DIRECT'
+  - 'DOMAIN-SUFFIX,126.com,DIRECT'
+  - 'DOMAIN-SUFFIX,126.net,DIRECT'
+  - 'DOMAIN-SUFFIX,127.net,DIRECT'
+  - 'DOMAIN-SUFFIX,yeah.net,DIRECT'
+  - 'DOMAIN-SUFFIX,sina.com,DIRECT'
+  - 'DOMAIN-SUFFIX,sinaimg.cn,DIRECT'
+  - 'DOMAIN-SUFFIX,ximalaya.com,DIRECT'
+  - 'DOMAIN-SUFFIX,xmcdn.com,DIRECT'
+  - 'DOMAIN-SUFFIX,csdn.net,DIRECT'
+  - 'DOMAIN-SUFFIX,gitee.com,DIRECT'
+  - 'DOMAIN-SUFFIX,jianshu.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cnblogs.com,DIRECT'
+  - 'DOMAIN-SUFFIX,oschina.net,DIRECT'
+  - 'DOMAIN-SUFFIX,ele.me,DIRECT'
+  - 'DOMAIN-SUFFIX,ctrip.com,DIRECT'
+  - 'DOMAIN-SUFFIX,suning.com,DIRECT'
+  - 'DOMAIN-SUFFIX,dianping.com,DIRECT'
+  - 'DOMAIN-SUFFIX,amap.com,DIRECT'
+  - 'DOMAIN-SUFFIX,autonavi.com,DIRECT'
+  - 'DOMAIN-SUFFIX,mi.com,DIRECT'
+  - 'DOMAIN-SUFFIX,miui.com,DIRECT'
+  - 'DOMAIN-SUFFIX,ifeng.com,DIRECT'
+  - 'DOMAIN-SUFFIX,youdao.com,DIRECT'
+  - 'DOMAIN-SUFFIX,iciba.com,DIRECT'
+  - 'DOMAIN-SUFFIX,xunlei.com,DIRECT'
+  - 'DOMAIN-SUFFIX,smzdm.com,DIRECT'
+  - 'DOMAIN-SUFFIX,sspai.com,DIRECT'
+  - 'DOMAIN-SUFFIX,36kr.com,DIRECT'
+  - 'DOMAIN-SUFFIX,speedtest.net,DIRECT'
+  - 'DOMAIN-SUFFIX,microsoft.com,DIRECT'
+  - 'DOMAIN-SUFFIX,microsoftonline.com,DIRECT'
+  - 'DOMAIN-SUFFIX,office.com,DIRECT'
+  - 'DOMAIN-SUFFIX,office365.com,DIRECT'
+  - 'DOMAIN-SUFFIX,windows.com,DIRECT'
+  - 'DOMAIN-SUFFIX,windowsupdate.com,DIRECT'
+  - 'DOMAIN-SUFFIX,live.com,DIRECT'
+  - 'DOMAIN-SUFFIX,msn.com,DIRECT'
+  - 'DOMAIN-SUFFIX,cn,DIRECT'
+  - 'DOMAIN-KEYWORD,-cn,DIRECT'
+  - 'DOMAIN-KEYWORD,google,PROXY'
+  - 'DOMAIN-KEYWORD,gmail,PROXY'
+  - 'DOMAIN-KEYWORD,youtube,PROXY'
+  - 'DOMAIN-KEYWORD,facebook,PROXY'
+  - 'DOMAIN-KEYWORD,twitter,PROXY'
+  - 'DOMAIN-KEYWORD,instagram,PROXY'
+  - 'DOMAIN-KEYWORD,whatsapp,PROXY'
+  - 'DOMAIN-KEYWORD,telegram,PROXY'
+  - 'DOMAIN-KEYWORD,github,PROXY'
+  - 'DOMAIN-KEYWORD,blogspot,PROXY'
+  - 'DOMAIN-KEYWORD,dropbox,PROXY'
+  - 'DOMAIN-KEYWORD,wikipedia,PROXY'
+  - 'DOMAIN-KEYWORD,pinterest,PROXY'
+  - 'DOMAIN-KEYWORD,discord,PROXY'
+  - 'DOMAIN-KEYWORD,openai,PROXY'
+  - 'DOMAIN-KEYWORD,anthropic,PROXY'
+  - 'DOMAIN-KEYWORD,netflix,PROXY'
+  - 'DOMAIN-KEYWORD,spotify,PROXY'
+  - 'DOMAIN-KEYWORD,amazon,PROXY'
+  - 'DOMAIN-SUFFIX,t.co,PROXY'
+  - 'DOMAIN-SUFFIX,x.com,PROXY'
+  - 'DOMAIN-SUFFIX,twimg.com,PROXY'
+  - 'DOMAIN-SUFFIX,fb.me,PROXY'
+  - 'DOMAIN-SUFFIX,fbcdn.net,PROXY'
+  - 'DOMAIN-SUFFIX,youtu.be,PROXY'
+  - 'DOMAIN-SUFFIX,ytimg.com,PROXY'
+  - 'DOMAIN-SUFFIX,gstatic.com,PROXY'
+  - 'DOMAIN-SUFFIX,ggpht.com,PROXY'
+  - 'DOMAIN-SUFFIX,googlevideo.com,PROXY'
+  - 'DOMAIN-SUFFIX,v2ex.com,PROXY'
+  - 'DOMAIN-SUFFIX,medium.com,PROXY'
+  - 'DOMAIN-SUFFIX,reddit.com,PROXY'
+  - 'DOMAIN-SUFFIX,redd.it,PROXY'
+  - 'DOMAIN-SUFFIX,imgur.com,PROXY'
+  - 'DOMAIN-SUFFIX,pixiv.net,PROXY'
+  - 'DOMAIN-SUFFIX,nytimes.com,PROXY'
+  - 'DOMAIN-SUFFIX,nyt.com,PROXY'
+  - 'DOMAIN-SUFFIX,bbc.com,PROXY'
+  - 'DOMAIN-SUFFIX,bbc.co.uk,PROXY'
+  - 'DOMAIN-SUFFIX,steamcommunity.com,PROXY'
+  - 'DOMAIN-SUFFIX,twitch.tv,PROXY'
+  - 'DOMAIN-SUFFIX,vimeo.com,PROXY'
+  - 'DOMAIN-SUFFIX,tumblr.com,PROXY'
+  - 'DOMAIN-SUFFIX,linkedin.com,PROXY'
+  - 'DOMAIN-SUFFIX,licdn.com,PROXY'
+  - 'DOMAIN-SUFFIX,mega.nz,PROXY'
+  - 'DOMAIN-SUFFIX,archive.org,PROXY'
+  - 'DOMAIN-SUFFIX,wikimedia.org,PROXY'
+  - 'DOMAIN-SUFFIX,soundcloud.com,PROXY'
+  - 'IP-CIDR,91.108.4.0/22,PROXY,no-resolve'
+  - 'IP-CIDR,91.108.8.0/21,PROXY,no-resolve'
+  - 'IP-CIDR,91.108.12.0/22,PROXY,no-resolve'
+  - 'IP-CIDR,91.108.16.0/22,PROXY,no-resolve'
+  - 'IP-CIDR,91.108.56.0/22,PROXY,no-resolve'
+  - 'IP-CIDR,149.154.160.0/20,PROXY,no-resolve'
+  - 'IP-CIDR6,2001:67c:4e8::/48,PROXY,no-resolve'
+  - 'IP-CIDR6,2001:b28:f23d::/48,PROXY,no-resolve'
+  - 'IP-CIDR6,2001:b28:f23f::/48,PROXY,no-resolve'
+  - 'GEOIP,CN,DIRECT'
+  - 'MATCH,PROXY'
